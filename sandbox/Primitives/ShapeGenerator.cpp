@@ -1,11 +1,9 @@
 #include "ShapeGenerator.h"
 #include <glm.hpp>
 #include <Primitives/vertex.h>
-
+#include <QtCore/qdebug.h>
 #define NUM_ELEMENTS_OF(x) sizeof(x)/sizeof(*x)
 
-struct Vertex;
-struct ShapeData;
 using glm::vec3;
 ShapeData ShapeGenerator::makeTriangle() {
 	Vertex verts[] = {
@@ -33,8 +31,12 @@ ShapeData ShapeGenerator::makeTriangle() {
 	return Tri;
 }
 
+vec3 getNormal(vec3 v1, vec3 v2, vec3 v3) {
+	return glm::normalize(glm::cross(v2 - v1, v3 - v1));
+}
+
 ShapeData ShapeGenerator::makeCube() {
-	Vertex verts[] = {
+	vec3 vecs[] = {
 		vec3(-1.0f, +1.0f, +1.0f), //1
 		vec3(+1.0f, +0.0f, +0.0f), //
 		vec3(+1.0f, +1.0f, +1.0f), //2
@@ -97,19 +99,67 @@ ShapeData ShapeGenerator::makeCube() {
 		16 ,17 ,18, 16, 18, 19,
 		20 ,22 ,21, 20, 23, 22,
 	};
+	Vertex *verts = new Vertex[24];
 	ShapeData Shape;
 
-	Shape.NumVertices = NUM_ELEMENTS_OF(verts);
+	for (int i = 0; i < 6; i++) {
+		int k = i * 4;
+		vec3 nor = getNormal(vecs[(k) * 2], vecs[(k + 1) * 2], vecs[(k + 2) * 2]);
+		for (int j = 0; j < 4; j++) {
+			int temp = i * 4 + j;
+			verts[temp].position = vecs[temp * 2];
+			verts[temp].color = vecs[temp * 2 + 1];
+			verts[temp].normal = nor;
+		}
+	}
+	Shape.NumVertices = 24;
 	Shape.Vertices = new Vertex[Shape.NumVertices];
-	memcpy(Shape.Vertices, verts, sizeof(verts));
+	memcpy(Shape.Vertices, verts, sizeof(Vertex) * Shape.NumVertices);
 
-	Shape.NumIndices = NUM_ELEMENTS_OF(ind);
+	Shape.NumIndices = 36;
 	Shape.Indices = new GLushort[Shape.NumIndices];
-	memcpy(Shape.Indices, ind, sizeof(ind));
+	memcpy(Shape.Indices, ind, sizeof(GLushort) * Shape.NumIndices);
+	
+	delete[] verts;
 
 	return Shape;
 }
 
+void ShapeGenerator::getPlaneVertices(int dimension, GLuint& Num, Vertex*& ver) {
+	Num = dimension * dimension;
+	ver = new Vertex[Num];
+	int runner = 0 ,half = dimension/2;
+	for (int i = 0; i < dimension; i++)
+		for (int j = 0; j < dimension; j++) {
+			ver[runner].position = vec3(i - half,0 ,j - half);
+			ver[runner].color = vec3(1.0, 1.0, 0.0);
+			ver[runner].normal = vec3(0.0, 1.0, 0.0);
+			runner++;
+		}
+}
+
+void ShapeGenerator::getPlaneIndices(int dimension,GLuint& Num,GLushort*& ind) {
+	Num = (dimension - 1) * (dimension - 1) * 2 * 3;
+	ind = new GLushort[Num];
+	int runner = 0;
+	for (int i = 0; i < dimension - 1; i++)
+		for (int j = 0; j < dimension - 1; j++){
+			ind[runner++] = i * dimension + j;
+			ind[runner++] = i * dimension + j + 1;
+			ind[runner++] = (i + 1) * dimension + j + 1;
+
+			ind[runner++] = i * dimension + j;
+			ind[runner++] = (i + 1) * dimension + j + 1;
+			ind[runner++] = (i + 1) * dimension + j;
+		}
+}
+
+ShapeData ShapeGenerator::makePlane(int dimension = 10) {
+	ShapeData plane;
+	getPlaneVertices(dimension, plane.NumVertices, plane.Vertices);
+	getPlaneIndices(dimension, plane.NumIndices, plane.Indices);
+	return plane;
+}
 ShapeGenerator::ShapeGenerator(){
 
 }

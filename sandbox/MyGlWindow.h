@@ -23,6 +23,7 @@ protected:
 	//void keyPressEvent(QKeyEvent*)
 public:
 	~MyGlWindow();
+	void setupVertexArray();
 	void sendDataToOpenGL();
 	bool checkStatus(
 		GLuint objectID,

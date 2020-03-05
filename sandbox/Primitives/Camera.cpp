@@ -5,8 +5,8 @@
 
 Camera::Camera()
 {
-	CameraPosition = vec3(0.0f, 0.0f, 0.0f);
-	ViewDirection = vec3(0.0f, 0.0f, -1.0f);
+	CameraPosition = vec3(0.0f, 12.8692875f, 20.3249702f);
+	ViewDirection = vec3(0.0116819320f, -0.627242148f, -0.778746963f);
 	UP = vec3(0.0f, 1.0f, 0.0f);
 	MousePosition = glm::vec2(-1, -1);
 }

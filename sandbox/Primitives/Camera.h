@@ -32,6 +32,7 @@ public:
 	void mouseUpdate(glm::vec2 newMousePosition);
 	glm::mat4 getWorldToViewMatrix() const;
 	void movePosition(MOVE_DIRECTION dir);
+	vec3 getPosition();
 };
 
 #endif

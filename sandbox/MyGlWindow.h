@@ -19,7 +19,7 @@ class MyGlWindow : public QGLWidget
 protected:
 	void initializeGL();
 	void paintGL();
-	void mouseMoveEvent(QMouseEvent*);
+	//void mouseMoveEvent(QMouseEvent*);
 	//void keyPressEvent(QKeyEvent*)
 public:
 	~MyGlWindow();
@@ -36,6 +36,7 @@ public:
 	std::string readShaderCode(const char* fileName);
 	void installShaders();
 	void keyPressEvent();
+	void myMouseMove();
 	//void myInitialize();
 private slots:
 	void myUpdate();

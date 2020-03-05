@@ -14,6 +14,8 @@
 #include <Primitives/ShapeData.h>
 #include <Primitives/ShapeGenerator.h>
 
+#include <Windows.h>
+
 GLuint programID;
 
 GLuint PlaneDrawNumVertices;
@@ -29,8 +31,14 @@ GLuint CubeindexBufferID;
 GLuint TransformMatrixUniformLocation;
 GLuint FullMatrixUniformLocation;
 GLuint LightPositionUniformLocation;
+GLuint AmbientLightUniformLocation;
+GLuint CameraPositionUniformLocation;
+
 using glm::vec3;
 using glm::mat4;
+
+mat4 CubeRandomTransform[10];
+
 bool MyGlWindow::checkStatus(
 	GLuint objectID,
 	PFNGLGETSHADERIVPROC objectPropertyGetterFunc,
@@ -151,6 +159,9 @@ void MyGlWindow::sendDataToOpenGL() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, CubeindexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube.indexBufferSize(), cube.Indices, GL_STATIC_DRAW);
 
+	for (int i = 1; i <= 4; i++) {
+		CubeRandomTransform[i] = glm::translate(vec3(rand() % 10 - 4, rand() % 3, rand() % 10 - 5));
+	}
 	plane.cleanup();
 	cube.cleanup();
 }
@@ -164,9 +175,16 @@ void MyGlWindow::initializeGL() {
 	sendDataToOpenGL();
 	installShaders();
 	setupVertexArray();
+	
+	int midx = this->x() + this->height() / 2;
+	int midy = this->y() + this->width() / 2;
+	SetCursorPos(midx, midy);
+
 	TransformMatrixUniformLocation = glGetUniformLocation(programID, "TransformMatrix");
 	FullMatrixUniformLocation = glGetUniformLocation(programID, "FullMatrix");
 	LightPositionUniformLocation = glGetUniformLocation(programID, "LightPosition");
+	AmbientLightUniformLocation = glGetUniformLocation(programID, "AmbientLight");
+	CameraPositionUniformLocation = glGetUniformLocation(programID, "CameraPosition");
 	connect(&myTimer, SIGNAL(timeout()), this, SLOT(myUpdate()));
 	myTimer.start(17);  //60fps
 }
@@ -184,8 +202,10 @@ void MyGlWindow::paintGL() {
 		static_cast<float>(width()) / height(), 0.1f, 50.0f);
 	cameraMatrix = camera.getWorldToViewMatrix();
 
-	glUniform3f(LightPositionUniformLocation, 0.0f, 4.0f, 0.0f);
-
+	vec3 cameraPosition = camera.getPosition();
+	glUniform3f(LightPositionUniformLocation, 0.0f, 3.0f, 0.0f);
+	glUniform4f(AmbientLightUniformLocation, 0.05f, 0.05f, 0.05f, 1.0f);
+	glUniform3fv(CameraPositionUniformLocation, 1, &cameraPosition[0]);
 	//Draw Plane
 	FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;			
 	glUniformMatrix4fv(TransformMatrixUniformLocation, 1, GL_FALSE, &TransformMatrix[0][0]);
@@ -193,19 +213,25 @@ void MyGlWindow::paintGL() {
 	glBindVertexArray(PlaneVAOID);
 	glDrawElements(GL_TRIANGLES, PlaneDrawNumVertices, GL_UNSIGNED_SHORT, 0);
 	//Draw Cube
-	TransformMatrix = glm::translate(vec3(-4.0f, 2.0f, -4.0f));
-	FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;
-	glUniformMatrix4fv(TransformMatrixUniformLocation, 1, GL_FALSE, &TransformMatrix[0][0]);
-	glUniformMatrix4fv(FullMatrixUniformLocation, 1, GL_FALSE, &FullMatrix[0][0]);
+	//TransformMatrix = glm::translate(vec3(-4.0f, 2.0f, -4.0f));
+	//FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;
+	//glUniformMatrix4fv(TransformMatrixUniformLocation, 1, GL_FALSE, &TransformMatrix[0][0]);
+	//glUniformMatrix4fv(FullMatrixUniformLocation, 1, GL_FALSE, &FullMatrix[0][0]);
 	glBindVertexArray(CubeVAOID);
-	glDrawElements(GL_TRIANGLES, CubeDrawNumVertices, GL_UNSIGNED_SHORT, 0);
-
+	//glDrawElements(GL_TRIANGLES, CubeDrawNumVertices, GL_UNSIGNED_SHORT, 0);
+	for (int i = 1; i <= 4; i++) {
+		TransformMatrix = CubeRandomTransform[i];
+		FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;
+		glUniformMatrix4fv(TransformMatrixUniformLocation, 1, GL_FALSE, &TransformMatrix[0][0]);
+		glUniformMatrix4fv(FullMatrixUniformLocation, 1, GL_FALSE, &FullMatrix[0][0]);
+		glDrawElements(GL_TRIANGLES, CubeDrawNumVertices, GL_UNSIGNED_SHORT, 0);
+	}
 }
 
-void MyGlWindow::mouseMoveEvent(QMouseEvent* e) {
-	camera.mouseUpdate(glm::vec2(e->x(),e->y()));
-	repaint();
-}
+//void MyGlWindow::mouseMoveEvent(QMouseEvent* e) {
+//	camera.mouseUpdate(glm::vec2(e->x(),e->y()));
+//	repaint();
+//}
 
 //void MyGlWindow::keyPressEvent(QKeyEvent* e) {
 //	qDebug() << e->key();
@@ -244,12 +270,29 @@ void MyGlWindow::keyPressEvent() {
 		camera.movePosition(MOVE_UP);
 	if (GetAsyncKeyState(VK_SHIFT))
 		camera.movePosition(MOVE_DOWN);
+	if (GetAsyncKeyState('P'))
+		this->showFullScreen();
+	if (GetAsyncKeyState(VK_ESCAPE))
+		this->close();
+}
+
+int ABS(const int& a) { return a > 0 ? a : -a; }
+
+void MyGlWindow::myMouseMove() {
+	POINT p;
+	GetCursorPos(&p);
+	int midx = this->x() + this->height()/2;
+	int midy = this->y() + this->width()/2;
+	//qDebug() << this->x() << this->y() << this->height() << this->width();
+	camera.mouseUpdate(glm::vec2(p.x - midx, p.y - midy));
+	SetCursorPos(midx, midy);
 }
 
 void MyGlWindow::myUpdate() {
 	myClock.clockGetNewFrame();
 	float frameTime = myClock.clockTimeLastFrame();
 	keyPressEvent();
+	myMouseMove();
 	repaint();
 }
 

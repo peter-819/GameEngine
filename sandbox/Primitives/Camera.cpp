@@ -16,11 +16,11 @@ Camera::~Camera()
 }
 
 void Camera::mouseUpdate(glm::vec2 newMousePosition) {
-	glm::vec2 MouseDelta = newMousePosition - MousePosition;
-	if (MousePosition.x < 0 || MousePosition.y<0 || glm::length(MouseDelta) > MOUSE_DELTA_MAXIUM) {
-		MousePosition = newMousePosition;
-		return;
-	}
+	glm::vec2 MouseDelta = newMousePosition;// -MousePosition;
+	//if (MousePosition.x < 0 || MousePosition.y<0 || glm::length(MouseDelta) > MOUSE_DELTA_MAXIUM) {
+	//	MousePosition = newMousePosition;
+	//	return;
+	//}
 	ViewDirection = glm::mat3(glm::rotate(-MouseDelta.x * MOUSE_VERTICAL_SPEED, UP)) * ViewDirection;
 	ViewDirection = glm::mat3(glm::rotate(MouseDelta.y * MOUSE_HORIZONTAL_SPEED, glm::cross(UP, ViewDirection))) * ViewDirection;
 	MousePosition = newMousePosition;
@@ -56,4 +56,8 @@ void Camera::movePosition(MOVE_DIRECTION dir) {
 	default:
 		break;
 	}
+}
+
+vec3 Camera::getPosition() {
+	return CameraPosition;
 }

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{4cde86a4-2583-4e8f-af08-95094a734166}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="sandbox.cpp">
@@ -24,10 +27,37 @@
     <ClCompile Include="MyGlWindow_moc.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Primitives\ShapeGenerator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitives\ShapeData.h">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitives\Camera.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyGlWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Primitives\vertex.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\ShapeGenerator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives\Camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\FragmentShaderCode.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="Shaders\VertexShaderCode.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

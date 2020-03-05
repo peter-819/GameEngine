@@ -93,13 +93,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Middleware\qt\include;$(SolutionDir)Middleware\glew\include;$(SolutionDir)engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Middleware\qt\include;$(SolutionDir)Middleware\glew\include;$(SolutionDir)engine;$(SolutionDir)Middleware\glm;$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Middleware\qt\lib;$(SolutionDir)Middleware\glew\lib;$(SolutionDir)engine\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>engine.lib;openGL32.lib;glew32.lib;Qt5Cored.lib;Qt5OpenGLd.lib;Qt5Widgetsd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt5Guid.lib;engine.lib;openGL32.lib;glew32s.lib;Qt5Cored.lib;Qt5OpenGLd.lib;Qt5Widgetsd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>del $(ProjectDir)$(Configuration)\engine.dll
@@ -133,7 +133,7 @@ copy $(SolutionDir)engine\$(Configuration)\engine.dll $(ProjectDir)$(Configurati
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Middleware\qt\include;$(SolutionDir)Middleware\glew\include;$(SolutionDir)engine</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Middleware\qt\include;$(SolutionDir)Middleware\glew\include;$(SolutionDir)engine;$(SolutionDir)Middleware\glm;$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,7 +141,7 @@ copy $(SolutionDir)engine\$(Configuration)\engine.dll $(ProjectDir)$(Configurati
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Middleware\qt\lib;$(SolutionDir)Middleware\glew\lib;$(SolutionDir)engine\$(Configuration)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>engine.lib;openGL32.lib;glew32.lib;Qt5Cored.lib;Qt5OpenGLd.lib;Qt5Widgetsd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt5Guid.lib;engine.lib;openGL32.lib;glew32s.lib;Qt5Cored.lib;Qt5OpenGLd.lib;Qt5Widgetsd.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreLinkEvent>
       <Command>del $(ProjectDir)$(Configuration)\engine.dll
@@ -169,12 +169,23 @@ copy $(SolutionDir)engine\$(Configuration)\engine.dll $(ProjectDir)$(Configurati
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Primitives\Camera.cpp" />
     <ClCompile Include="MyGlWindow.cpp" />
     <ClCompile Include="MyGlWindow_moc.cpp" />
+    <ClCompile Include="Primitives\ShapeData.h" />
+    <ClCompile Include="Primitives\ShapeGenerator.cpp" />
     <ClCompile Include="sandbox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Primitives\Camera.h" />
     <ClInclude Include="MyGlWindow.h" />
+    <ClInclude Include="Primitives\ShapeGenerator.h" />
+    <ClInclude Include="Primitives\vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
+    <None Include="Shaders\FragmentShaderCode.glsl" />
+    <None Include="Shaders\VertexShaderCode.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

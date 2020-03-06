@@ -15,6 +15,6 @@ void main()
 	vec4 v = vec4(position,1.0);
 	gl_Position = FullMatrix * v;
 	thePosition = vec3(TransformMatrix * v);
-	theNormal = vec3(TransformMatrix * vec4(normal,0));
+	theNormal = normalize(vec3(TransformMatrix * vec4(normal,0)));
 
 }

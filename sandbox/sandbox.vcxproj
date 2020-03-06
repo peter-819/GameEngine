@@ -184,6 +184,8 @@ copy $(SolutionDir)engine\$(Configuration)\engine.dll $(ProjectDir)$(Configurati
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram.cd" />
+    <None Include="LightBallFragmentShader.glsl" />
+    <None Include="LightBallVertexShader.glsl" />
     <None Include="Shaders\FragmentShaderCode.glsl" />
     <None Include="Shaders\VertexShaderCode.glsl" />
   </ItemGroup>

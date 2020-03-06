@@ -17,6 +17,7 @@
 #include <Windows.h>
 
 GLuint programID;
+GLuint LightProgramID;
 
 GLuint PlaneDrawNumVertices;
 GLuint PlaneVAOID;
@@ -34,8 +35,12 @@ GLuint LightPositionUniformLocation;
 GLuint AmbientLightUniformLocation;
 GLuint CameraPositionUniformLocation;
 
+GLuint MouseTracking = 1;
+
 using glm::vec3;
 using glm::mat4;
+vec3 LightPosition = vec3(0.0f, 5.0f, 0.0f);
+float LightMoveSpeed = 0.1f;
 
 mat4 CubeRandomTransform[10];
 
@@ -108,7 +113,33 @@ void MyGlWindow::installShaders() {
 	if (!checkProgramStatus(programID)) {
 		return;
 	}
-	glUseProgram(programID);
+
+	vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	temp = readShaderCode(".\\Shaders\\LightBallVertexShader.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(vertexShaderID, 1, adapter, 0);
+	temp = readShaderCode(".\\Shaders\\LightBallFragmentShader.glsl");
+	adapter[0] = temp.c_str();
+	glShaderSource(fragmentShaderID, 1, adapter, 0);
+
+	glCompileShader(vertexShaderID);
+	glCompileShader(fragmentShaderID);
+	if (!checkShaderStatus(vertexShaderID) || !checkShaderStatus(fragmentShaderID)) {
+		return;
+	}
+	LightProgramID = glCreateProgram();
+	glAttachShader(LightProgramID, vertexShaderID);
+	glAttachShader(LightProgramID, fragmentShaderID);
+	glLinkProgram(LightProgramID);
+
+	glDeleteShader(vertexShaderID);
+	glDeleteShader(fragmentShaderID);
+
+	if (!checkProgramStatus(LightProgramID)) {
+		return;
+	}
 }
 
 void MyGlWindow::setupVertexArray() {
@@ -134,6 +165,7 @@ void MyGlWindow::setupVertexArray() {
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)(sizeof(float) * 3));
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 9, (void*)(sizeof(float) * 6));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, CubeindexBufferID);
+
 }
 
 void MyGlWindow::sendDataToOpenGL() {
@@ -159,8 +191,10 @@ void MyGlWindow::sendDataToOpenGL() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, CubeindexBufferID);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, cube.indexBufferSize(), cube.Indices, GL_STATIC_DRAW);
 
-	for (int i = 1; i <= 4; i++) {
-		CubeRandomTransform[i] = glm::translate(vec3(rand() % 10 - 4, rand() % 3, rand() % 10 - 5));
+	for (int i = 1; i < 10; i++) {
+		CubeRandomTransform[i] =
+			glm::translate(vec3(rand() % 10 - 4, rand() % 3, rand() % 10 - 5))
+			* glm::scale(vec3(0.5, 0.5, 0.5));
 	}
 	plane.cleanup();
 	cube.cleanup();
@@ -194,6 +228,8 @@ void MyGlWindow::paintGL() {
 	glClear(GL_DEPTH_BUFFER_BIT| GL_COLOR_BUFFER_BIT);
 	glViewport(0, 0, width(), height());
 
+	glUseProgram(programID);
+
 	mat4 projectionMatrix = mat4(1.0f);
 	mat4 cameraMatrix = mat4(1.0f);
 	mat4 TransformMatrix = mat4(1.0f);
@@ -203,10 +239,11 @@ void MyGlWindow::paintGL() {
 	cameraMatrix = camera.getWorldToViewMatrix();
 
 	vec3 cameraPosition = camera.getPosition();
-	glUniform3f(LightPositionUniformLocation, 0.0f, 3.0f, 0.0f);
-	glUniform4f(AmbientLightUniformLocation, 0.05f, 0.05f, 0.05f, 1.0f);
+	glUniform3fv(LightPositionUniformLocation, 1, &LightPosition[0]);
+	glUniform4f(AmbientLightUniformLocation, 0.15f, 0.15f, 0.15f, 1.0f);
 	glUniform3fv(CameraPositionUniformLocation, 1, &cameraPosition[0]);
 	//Draw Plane
+	glUseProgram(programID);
 	FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;			
 	glUniformMatrix4fv(TransformMatrixUniformLocation, 1, GL_FALSE, &TransformMatrix[0][0]);
 	glUniformMatrix4fv(FullMatrixUniformLocation, 1, GL_FALSE, &FullMatrix[0][0]);
@@ -219,13 +256,20 @@ void MyGlWindow::paintGL() {
 	//glUniformMatrix4fv(FullMatrixUniformLocation, 1, GL_FALSE, &FullMatrix[0][0]);
 	glBindVertexArray(CubeVAOID);
 	//glDrawElements(GL_TRIANGLES, CubeDrawNumVertices, GL_UNSIGNED_SHORT, 0);
-	for (int i = 1; i <= 4; i++) {
+	for (int i = 1; i < 10; i++) {
 		TransformMatrix = CubeRandomTransform[i];
 		FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;
 		glUniformMatrix4fv(TransformMatrixUniformLocation, 1, GL_FALSE, &TransformMatrix[0][0]);
 		glUniformMatrix4fv(FullMatrixUniformLocation, 1, GL_FALSE, &FullMatrix[0][0]);
 		glDrawElements(GL_TRIANGLES, CubeDrawNumVertices, GL_UNSIGNED_SHORT, 0);
 	}
+
+	TransformMatrix = glm::translate(LightPosition) * glm::scale(vec3(0.2f, 0.2f, 0.2f));
+	FullMatrix = projectionMatrix * cameraMatrix * TransformMatrix;
+	GLuint lightFullMatrixUL = glGetUniformLocation(LightProgramID, "fullMatrix");
+	glUseProgram(LightProgramID); 
+	glUniformMatrix4fv(lightFullMatrixUL, 1, GL_FALSE, &FullMatrix[0][0]);
+	glDrawElements(GL_TRIANGLES, CubeDrawNumVertices, GL_UNSIGNED_SHORT, 0);
 }
 
 //void MyGlWindow::mouseMoveEvent(QMouseEvent* e) {
@@ -274,6 +318,21 @@ void MyGlWindow::keyPressEvent() {
 		this->showFullScreen();
 	if (GetAsyncKeyState(VK_ESCAPE))
 		this->close();
+	if (GetAsyncKeyState('M'))
+		MouseTracking ^= 1;
+
+	if (GetAsyncKeyState(VK_UP))
+		LightPosition.z -= LightMoveSpeed;
+	if (GetAsyncKeyState(VK_DOWN))
+		LightPosition.z += LightMoveSpeed;
+	if (GetAsyncKeyState(VK_LEFT))
+		LightPosition.x -= LightMoveSpeed;
+	if (GetAsyncKeyState(VK_RIGHT))
+		LightPosition.x += LightMoveSpeed;
+	if (GetAsyncKeyState('J'))
+		LightPosition.y += LightMoveSpeed;
+	if (GetAsyncKeyState('K'))
+		LightPosition.y -= LightMoveSpeed;
 }
 
 int ABS(const int& a) { return a > 0 ? a : -a; }
@@ -292,11 +351,12 @@ void MyGlWindow::myUpdate() {
 	myClock.clockGetNewFrame();
 	float frameTime = myClock.clockTimeLastFrame();
 	keyPressEvent();
-	myMouseMove();
+	if(MouseTracking) myMouseMove();
 	repaint();
 }
 
 MyGlWindow::~MyGlWindow() {
 	glUseProgram(0);
 	glDeleteProgram(programID);
+	glDeleteProgram(LightProgramID);
 }

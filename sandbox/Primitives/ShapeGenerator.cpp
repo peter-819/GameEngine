@@ -136,6 +136,7 @@ void ShapeGenerator::getPlaneVertices(int dimension, GLuint& Num, Vertex*& ver) 
 			ver[runner].normal = vec3(0.0, 1.0, 0.0);
 			runner++;
 		}
+
 }
 
 void ShapeGenerator::getPlaneIndices(int dimension,GLuint& Num,GLushort*& ind) {

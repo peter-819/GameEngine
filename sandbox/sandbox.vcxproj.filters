@@ -59,5 +59,11 @@
       <Filter>Shader</Filter>
     </None>
     <None Include="ClassDiagram.cd" />
+    <None Include="LightBallFragmentShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
+    <None Include="LightBallVertexShader.glsl">
+      <Filter>Shader</Filter>
+    </None>
   </ItemGroup>
 </Project>
